@@ -17,7 +17,7 @@ public class MainClass {
 		double frameEnd = INITIAL_FRAME_SIZE, it = 0;
 
 		Scanner in = new Scanner(System.in);
-		System.out.println("digite o numero de etiquetas");
+		System.out.println("Enter number of tags: ");
 		int n = Integer.parseInt(in.nextLine());
 		int nBackup = n;
 		in.close();
@@ -70,8 +70,8 @@ public class MainClass {
 					}
 
 				}
-				it++;
-
+				it++; // Frame count
+				
 				totalCollisions += collisions;
 				totalEmpty += empty;
 				totalSuccess += success;
