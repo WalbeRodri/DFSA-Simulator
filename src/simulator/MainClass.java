@@ -4,85 +4,91 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class MainClass {
-	
+
 	private static final int E = 0;
 	private static final int S = 1;
-	private static final int C = 2;
-	private static final int FRAME_SIZE = 128;
-	
+	private static final int INITIAL_FRAME_SIZE = 128;
+	private static final int SIM_NUMBER = 2000; // Number of simulations
+
 	public static void main(String[] args) {
 		//array gigantesco onde simularemos o leitor e a aceitacao de slots
-		int[] frames = new int[1000000];
+		int[] frames = new int[10000];
 
 		//constantes que indicarao onde estamos dentro do array 
-		double frameStart = 0, frameEnd = FRAME_SIZE, it = 0;
+		double frameEnd = INITIAL_FRAME_SIZE, it = 0;
 
-		//scanner para descobrir junto ao usuario a chance de cada etiqueta querer transmitir
 		Scanner in = new Scanner(System.in);
 		System.out.println("digite o numero de etiquetas");
 		int n = Integer.parseInt(in.nextLine());
-		//System.out.println("digite a probabilidade de colisão das etiquetas p");
-		//int p = Integer.parseInt(in.nextLine());
+		int nBackup = n;
+		in.close();
 
-		//randomico que usaremos para descobrir que etiqueta transmitira por frame
 		Random r = new Random();
-		int aux, collisions = 0, empty = 0, success = 0, m = 0;
-		int totalCollisions = 0;
-		double p = 0;
-		// iteracao externa indica o slot a ser preenchido iteracao interna indica a etiqueta atual transmitindo
-		do {
-			//if (it > 1) {
-				//p = (n / (frameEnd - frameStart)) * 100;
-			//} else 
-			p = (1 / (frameEnd - frameStart)) * 100;
-			System.out.println("(" + 1 + " / " + (frameEnd - frameStart) + ") * 100 = " + p);
-			for (int i = (int) frameStart; i < frameEnd; i++) {
-				for (int j = 0; j < (n - m); j++) {
-					aux = r.nextInt(100);
-					//System.out.println("aux = " + aux + " / p = " + p);
-					// procura o caso ideal em que a etiqueta conseguira alocar e o fram esta vazio
-					if (aux > p) {
-						// etiqueta nao tenta transmitir, sai desta iteracao sem realizar alteracoes
-						continue;
-					} else if (frames[i] == S || frames[i] == C) {
-						// colisao, pula
-						// System.out.println("" + aux);
-						frames[i] = C;
-						m++;
-					} else if (frames[i] == E) {
-						// sem colisao, aloca e torce para nao colidir com as proximas :D
-						frames[i] = S;
-					}
-				}
-				// vamos agora ver se houveram colisoes nas etiquetas passadas e reajustar o tamanho do frame  :)
-				if (frames[i] == S) {
-					// decrementa o total de etiquetas para a próxima iteracao
-					n--;
-					success++;
-				} else if (frames[i] == C) {
-					// incrementamos o inteiro colisoes para estatisticas futuras
-					collisions++;
-					totalCollisions++;
-				} else {
-					empty++;
-				}
-			}
-			it++;
-			m = 0;
-			// lower bound
-			if (collisions > 0) {
-				frameStart = frameEnd;
-				frameEnd = (frameStart + (collisions * 2));
-				//System.out.println(collisions * 2);
-			} else {
-				frameStart = frameEnd;
-				frameEnd += FRAME_SIZE;
-				System.out.println("ops não colidiu");
-			}
-			collisions = 0;
-		} while (n > 0);
-		System.out.println("sucessos: "+success+" \n"+"vazios: "+empty+" \n"+"colisões: "+totalCollisions+"\n"+"iteracoes: "+it);
+		int aux, i = 0;
+		int collisions = 0, empty = 0, success = 0;
+		int totalCollisions = 0, totalEmpty = 0, totalSuccess = 0;
+		int arrayLimiter = 0;
 
+		for(int s = 0; s < SIM_NUMBER; s++) {
+			n = nBackup;
+			do {
+				collisions = 0;
+				empty = 0;
+				success = 0;
+
+				arrayLimiter = (int) frameEnd;
+
+				// Initialize array / Clear frame
+				for (i = 0; i < arrayLimiter; i++) {
+					frames[i] = 0;
+				}
+
+				// Apply random tag inputs in the frame
+				for (i = 0; i < n; i++) {
+					aux = r.nextInt(arrayLimiter);
+					frames[aux]++;
+				}
+
+				/* Count collisions, tags accepted 
+			 	and empty slots in the frame    */
+				for (i = 0; i < arrayLimiter; i++) {
+
+					switch(frames[i]) {
+					case E:
+						empty++;
+						break;
+
+					case S:
+						success++;
+						n--;
+						break;
+
+					default:
+						collisions++;
+						break;
+					}
+
+				}
+				it++;
+
+				totalCollisions += collisions;
+				totalEmpty += empty;
+				totalSuccess += success;
+
+				// lower bound
+				if (collisions > 0) {
+					frameEnd = (collisions * 2.39);
+				} else frameEnd = INITIAL_FRAME_SIZE;
+
+			} while (n > 0);
+			
+		}
+		
+		System.out.println("\nAverage of " + SIM_NUMBER + " simulations:");
+		System.out.println("Success: " + (totalSuccess / SIM_NUMBER));
+		System.out.println("Empty: " + (totalEmpty / SIM_NUMBER));
+		System.out.println("Collisions: " + (totalCollisions / SIM_NUMBER));
+		System.out.println("Frames: " + (it / SIM_NUMBER));
 	}
 
 }
