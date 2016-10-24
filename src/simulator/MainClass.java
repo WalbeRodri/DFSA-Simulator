@@ -11,10 +11,9 @@ public class MainClass {
 	private static final int SIM_NUMBER = 2000; // Number of simulations
 
 	public static void main(String[] args) {
-		//array gigantesco onde simularemos o leitor e a aceitacao de slots
 		int[] frames = new int[10000];
+		String estimator = "Schoute";
 
-		//constantes que indicarao onde estamos dentro do array 
 		double frameEnd = INITIAL_FRAME_SIZE, it = 0;
 
 		Scanner in = new Scanner(System.in);
@@ -54,6 +53,7 @@ public class MainClass {
 				for (i = 0; i < arrayLimiter; i++) {
 
 					switch(frames[i]) {
+					
 					case E:
 						empty++;
 						break;
@@ -66,6 +66,7 @@ public class MainClass {
 					default:
 						collisions++;
 						break;
+						
 					}
 
 				}
@@ -75,16 +76,29 @@ public class MainClass {
 				totalEmpty += empty;
 				totalSuccess += success;
 
-				// lower bound
 				if (collisions > 0) {
-					frameEnd = (collisions * 2.39);
+					
+					switch(estimator) {
+					
+					case "LowerBound":
+						frameEnd = (collisions * 2);
+						break;
+					case "Schoute":
+						frameEnd = (collisions * 2.39);
+						break;
+					default:
+						break;
+						
+					}
+					
 				} else frameEnd = INITIAL_FRAME_SIZE;
 
 			} while (n > 0);
 			
 		}
 		
-		System.out.println("\nAverage of " + SIM_NUMBER + " simulations:");
+		System.out.println("\nUsing " + estimator + " estimator.");
+		System.out.println("Average of " + SIM_NUMBER + " simulations:");
 		System.out.println("Success: " + (totalSuccess / SIM_NUMBER));
 		System.out.println("Empty: " + (totalEmpty / SIM_NUMBER));
 		System.out.println("Collisions: " + (totalCollisions / SIM_NUMBER));
